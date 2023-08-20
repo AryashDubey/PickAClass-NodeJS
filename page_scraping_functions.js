@@ -65,6 +65,7 @@ async function scrapeASUWebsite(classData, browser) {
       };
     }
   } catch (e) {
+    console.log('ERROR PLACE 2')
     console.log(classData.classNum);
     console.log(e);
     return {
@@ -99,6 +100,7 @@ async function checkIfClassExistsFunction(classNumber, term) {
       }
     } catch (error) {
       await browser.close();
+      console.log('ERROR PLACE 4')
       console.log("error");
       console.log(error);
       return false;

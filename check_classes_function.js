@@ -1,20 +1,23 @@
 const scrapFunc = require("./page_scraping_functions");
 const functions = require("firebase-functions");
 const admin = require("firebase-admin");
-var serviceAccount = require('./admin.json');
+const { exec, execSync } = require("child_process");
+
+var serviceAccount = require("./admin.json");
 admin.initializeApp({
-credential: admin.credential.cert(serviceAccount),
-databaseURL: "https://pick-a-class.firebaseio.com",
-authDomain: "pick-a-class.firebaseapp.com",
+  credential: admin.credential.cert(serviceAccount),
+  databaseURL: "https://pick-a-class.firebaseio.com",
+  authDomain: "pick-a-class.firebaseapp.com",
 });
 const db = admin.firestore();
+db.settings({ ignoreUndefinedProperties: true });
 const puppeteer = require("puppeteer"); // Adding Puppeteer
 const {
   sendCloseMail,
   sendOpenMail,
   sendClassChangedEmail,
 } = require("./mail_functions");
-const Parallelism = 5;
+const Parallelism = 4;
 const asyncBatch = require("async-batch").default;
 var classDataForAsyncMethod = [];
 
@@ -48,7 +51,7 @@ async function scheduledMaintenanceFunction() {
     Parallelism
   );
 }
-
+let numberOfTimesFunctionCalled = 0;
 //
 async function checkForClassesFunction() {
   await puppeteer
@@ -85,10 +88,14 @@ async function checkForClassesFunction() {
         }
         await browser.close();
       } catch (error) {
+        console.log("Error Place 1");
         console.log(error);
         await browser.close();
       }
     });
+  numberOfTimesFunctionCalled++;
+  console.log(`Function called ${numberOfTimesFunctionCalled} times`);
+  await checkForClassesFunction();
 }
 
 async function checkForIndividualClass(classData, browser) {
@@ -112,9 +119,18 @@ async function checkForIndividualClass(classData, browser) {
     if (classData.isOpen != result.result) {
       var mail_list = await getClassSubscriberList(classData.classID);
       try {
-        // if (classNum == 70473) {
-        //   await jsfile.fn("80917", "70473");
-        // }
+        if (classNum === 70473) {
+          console.log("PLAYING SOUND FOR Class 70473--"+ classNum);
+          execSync(`afplay j.mp3`);
+        }
+        if (classNum === 70476) {
+          console.log("PLAYING SOUND FOR Class 70476--"+ classNum);
+          execSync(`afplay j.mp3`);
+        }
+        if (classNum === 75883) {
+          console.log("PLAYING SOUND FOR Class 75883--"+ classNum);
+          execSync(`afplay j.mp3`);
+        }
       } catch (error) {
         console.log(e);
       }
@@ -209,41 +225,43 @@ module.exports = {
   db,
   scheduledMaintenanceFunction,
   anotherTestFunction,
+  getBackClassDataFromUsers,
 };
 
 //FUNCTION TO RESET USER DATA
 
-// async function testFunction() {
-//   var list = [];
-//   var classData = await db
-//     .collection("users")
-//     .get()
-//     .then((data) => {
-//       data.forEach((doc) => {
-//         //console.log(doc.data());
-//         var cl = doc.data().classIDs;
-//         if (cl !== undefined) {
-//           cl.forEach((e) => {
-//             list.push({
-//               classID: e,
-//               classNum: parseInt(e.substring(4)),
-//               isOpen: false,
-//             });
-//           });
-//         }
-//       });
-//     });
-//   var uniq = [];
-//   list.forEach((e) => {
-//     if (!uniq.includes(e)) {
-//       uniq.push(e);
-//     }
-//   });
-//   const unique = [...new Map(list.map((doc) => [doc.classID, doc])).values()];
+async function getBackClassDataFromUsers() {
+  var list = [];
+  var classData = await db
+    .collection("users")
+    .get()
+    .then((data) => {
+      data.forEach((doc) => {
+        //console.log(doc.data());
+        var cl = doc.data().classIDs;
+        if (cl !== undefined) {
+          cl.forEach((e) => {
+            list.push({
+              classID: e,
+              classNum: parseInt(e.substring(4, 9)),
+              isOpen: false,
+              term: Number(e.substring(10)), //change to number,
+            });
+          });
+        }
+      });
+    });
+  var uniq = [];
+  list.forEach((e) => {
+    if (!uniq.includes(e)) {
+      uniq.push(e);
+    }
+  });
+  const unique = [...new Map(list.map((doc) => [doc.classID, doc])).values()];
 
-//   console.log(unique);
-//    //await db.collection("universities").doc("asu").update({ classes: unique });
-// }
+  console.log(unique);
+  await db.collection("universities").doc("asu").update({ classes: unique });
+}
 
 //
 async function anotherTestFunction() {
@@ -257,7 +275,7 @@ async function anotherTestFunction() {
       var cl = data.data().classIDs;
       if (cl !== undefined) {
         cl.forEach((e) => {
-          list.push(`${e}-2237`);
+          list.push(`${e}`);
         });
       }
       console.log(list);

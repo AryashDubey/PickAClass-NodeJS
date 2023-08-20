@@ -6,9 +6,10 @@
   "scripts": {
     "start": "firebase emulators:start",
     "test": "echo \"Error: no test specified\" && exit 1"
-
-  },"dependencies": {
+  },
+  "dependencies": {
     "@google-cloud/pubsub": "^3.2.1",
+    "@sparticuz/chromium": "^114.0.0",
     "firebase-admin": "^10.0.2",
     "firebase-functions": "^3.18.0",
     "fs": "^0.0.1-security",
