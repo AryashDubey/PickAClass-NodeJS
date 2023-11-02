@@ -1,12 +1,13 @@
 const aryashClasses = [
   {
-    beforeClass: "80917",
-    afterClass: "70473",
-    className: "CSE 120",
+    beforeClass: "19214",
+    afterClass: "25690",
+    className: "MAT 343",
   },
   {
-    beforeClass: "93668",
-    afterClass: "79268",
-    className: "CSE 240",
+    beforeClass: "21671",
+    afterClass: "34811",
+    className: "CSE 230",
   },
 ];
+module.exports = { aryashClasses };

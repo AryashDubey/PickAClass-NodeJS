@@ -1,9 +1,8 @@
 const scrapFunc = require("./page_scraping_functions");
-const functions = require("firebase-functions");
 const admin = require("firebase-admin");
-const { exec, execSync } = require("child_process");
-
 var serviceAccount = require("./admin.json");
+const { execSync } = require("child_process");
+
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
   databaseURL: "https://pick-a-class.firebaseio.com",
@@ -19,6 +18,8 @@ const {
 } = require("./mail_functions");
 const Parallelism = 4;
 const asyncBatch = require("async-batch").default;
+const jsfile = require("../../../Learning/Server/index");
+
 var classDataForAsyncMethod = [];
 
 async function scheduledMaintenanceFunction() {
@@ -98,6 +99,14 @@ async function checkForClassesFunction() {
   await checkForClassesFunction();
 }
 
+async function playAudio() {
+  try {
+    execSync(`powershell -c (New-Object Media.SoundPlayer "j.wav").PlaySync()`);
+  } catch (e) {
+    console.log(e);
+  }
+}
+
 async function checkForIndividualClass(classData, browser) {
   var classNum = classData.classNum;
 
@@ -110,30 +119,48 @@ async function checkForIndividualClass(classData, browser) {
     if (classData.data !== undefined) {
       console.log("Class Changed");
       const list = await getClassChangesSubscriberList(classData.classID);
-      sendClassChangedEmail(list, result.profNames, classNum);
-    } else {
+      await sendClassChangedEmail(list, result.profNames, classNum);
     }
   }
 
   if (result.result) {
+    //BIO 130
+    if (classNum == 15176) {
+      // await jsfile.fn("20783", "15176");
+      playAudio();
+    }
+    //KEVIN BURGER CSE 230
+    if (classNum == 34811) {
+      await jsfile.fn("13964", "34811");
+      playAudio();
+    }
+    if (classNum == 34812) {
+      await jsfile.fn("13964", "34812");
+      playAudio();
+    }
+
+    //MAT 343
+    if (classNum == 25690) {
+      await jsfile.fn("14480", "25690");
+      playAudio();
+    }
+    if (classNum == 25613) {
+      await jsfile.fn("14480", "25613");
+      playAudio();
+    }
+
+    if (classNum == 19214) {
+      await jsfile.fn("14480", "19214");
+      playAudio();
+    }
+
+    // if (classNum == 26224) {
+    //   await jsfile.fn("17217", "26224");
+    //   playAudio();
+    // }
     if (classData.isOpen != result.result) {
       var mail_list = await getClassSubscriberList(classData.classID);
-      try {
-        if (classNum === 70473) {
-          console.log("PLAYING SOUND FOR Class 70473--"+ classNum);
-          execSync(`afplay j.mp3`);
-        }
-        if (classNum === 70476) {
-          console.log("PLAYING SOUND FOR Class 70476--"+ classNum);
-          execSync(`afplay j.mp3`);
-        }
-        if (classNum === 75883) {
-          console.log("PLAYING SOUND FOR Class 75883--"+ classNum);
-          execSync(`afplay j.mp3`);
-        }
-      } catch (error) {
-        console.log(e);
-      }
+
       console.log(`NEW OPEN ${classNum} `);
 
       if (
@@ -149,9 +176,9 @@ async function checkForIndividualClass(classData, browser) {
     }
   } else {
     if (classData.isOpen != result.result) {
-      var mail_list = await getClassSubscriberList(classData.classID);
+      var newMailList = await getClassSubscriberList(classData.classID);
       console.log("Sending CLOSE Mail");
-      await sendCloseMail(mail_list, result.profNames, classNum);
+      await sendCloseMail(newMailList, result.profNames, classNum);
     } else {
       console.log("Still Close");
     }
@@ -179,10 +206,7 @@ async function getClassSubscriberList(classID) {
     };
   }
 
-  const time = new Date().getTime();
   classData.forEach((doc) => {
-    const isBasicExpiredForFreePlanUsers =
-      doc.data().userCreatedOn + 1000 * 60 * 60 * 24 * 7 > time;
     console.log(doc.data().userCreatedAt);
     if (doc.data().paidSubscriber) {
       paidSubscriberList.push(doc.data().email);
@@ -226,13 +250,14 @@ module.exports = {
   scheduledMaintenanceFunction,
   anotherTestFunction,
   getBackClassDataFromUsers,
+  playAudio,
 };
 
 //FUNCTION TO RESET USER DATA
 
 async function getBackClassDataFromUsers() {
   var list = [];
-  var classData = await db
+  await db
     .collection("users")
     .get()
     .then((data) => {

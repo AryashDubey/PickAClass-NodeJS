@@ -8,8 +8,8 @@ let transporter = nodemailer.createTransport({
   port: 465,
   secure: true,
   auth: {
-    user: "pickaclassmail@gmail.com",
-    pass: "bmsjwwclbqjlgfhq",
+    user: "mail@pickaclass.app",
+    pass: "hinbnafwmxqbpdlj",
   },
 });
 
@@ -23,7 +23,7 @@ async function sendOpenMail(mail_list, profName, classNum) {
       subject: `Prof. ${profName}'s class, ${classNum}, is now Open!`, // email subject
       html: emailFunctions.generateOpenEmail(classNum, profName), // email content in HTML
     };
-    await transporter.sendMail(mailOptions, (error, info) => {
+    await transporter.sendMail(mailOptions, (error) => {
       if (error) {
         console.log(error);
         return error.toString();
@@ -43,7 +43,7 @@ async function sendOpenMail(mail_list, profName, classNum) {
           profName
         ), // email content in HTML
       };
-      await transporter.sendMail(mailOptions, (error, info) => {
+      await transporter.sendMail(mailOptions, (error) => {
         if (error) {
           console.log(error);
           return error.toString();
@@ -65,7 +65,7 @@ async function sendClassChangedEmail(mail_list, profName, classNum) {
       subject: `Changes in ${classNum}. Assigned to ${profName}`, // email subject
       html: generateClassChangesEmail(classNum, profName), // email content in HTML
     };
-    await transporter.sendMail(mailOptions, (error, info) => {
+    await transporter.sendMail(mailOptions, (error) => {
       if (error) {
         console.log(error);
         return error.toString();
@@ -87,7 +87,7 @@ async function sendCloseMail(mail_list, profName, classNum) {
   };
 
   // returning result
-  await transporter.sendMail(mailOptions, (error, info) => {
+  await transporter.sendMail(mailOptions, (error) => {
     if (error) {
       console.log(error);
       return error.toString();

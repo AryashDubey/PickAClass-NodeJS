@@ -1,12 +1,13 @@
 const puppeteer = require("puppeteer"); // Adding Puppeteer
-const { sha256 } = require("./sha256");
-const { log } = require("firebase-functions/logger");
 
 async function scrapeASUWebsite(classData, browser) {
   try {
     const classNumber = classData.classNum;
     const classTerm = classData.term;
     const page = await browser.newPage();
+    await page.setUserAgent(
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.1000.0 Safari/537.36"
+    );
     await page.goto(
       `https://catalog.apps.asu.edu/catalog/classes/classlist?advanced=true&campusOrOnlineSelection=A&classNbr=${classNumber}&honors=F&promod=F&searchType=all&term=${classTerm}`
     );
@@ -45,6 +46,12 @@ async function scrapeASUWebsite(classData, browser) {
       var endIndex = string.indexOf(" of");
       var prop = string.slice(0, endIndex);
       if (prop > 0) {
+        // if (classNumber == 22290) {
+        //   if (prop >10) {
+        //     console.log("IEE 3800000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+        //     playAudio();
+        //   }
+        // }
         return {
           result: true,
           profNames: data.profNames[0],
@@ -65,7 +72,7 @@ async function scrapeASUWebsite(classData, browser) {
       };
     }
   } catch (e) {
-    console.log('ERROR PLACE 2')
+    console.log("ERROR PLACE 2");
     console.log(classData.classNum);
     console.log(e);
     return {
@@ -100,7 +107,7 @@ async function checkIfClassExistsFunction(classNumber, term) {
       }
     } catch (error) {
       await browser.close();
-      console.log('ERROR PLACE 4')
+      console.log("ERROR PLACE 4");
       console.log("error");
       console.log(error);
       return false;
